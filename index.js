@@ -41,6 +41,11 @@ app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     console.log('Received data:', { username, email });
 
+    // Check if any required fields are missing
+    if (!username || !email || !password) {
+    return res.status(400).json({ error: "Please provide username, email, and password" });
+  }
+
     try {
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -69,6 +74,8 @@ app.post('/login', async (req, res) => {
 
         if (isPasswordCorrect) {
             const token = jwt.sign({ _id: foundUser._id, email: foundUser.email }, privateKey, { expiresIn: '1h' });
+            console.log("Login successful for user:", email);
+            console.log("Generated token:", token);
             res.status(200).json({ token });
         } else {
             res.status(401).json("password incorrect");
@@ -79,52 +86,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-
-// // Add a product to favorites
-// router.post('/favorites', isAuthenticated, async (req, res) => {
-//     const { productId } = req.body;
-//     const userId = req.payload._id; // Assuming payload contains user id
-  
-//     try {
-//       // Check if the product ID is provided
-//       if (!productId) {
-//         return res.status(400).json({ message: "Product ID is required" });
-//       }
-  
-//       // Check if the user exists
-//       const user = await UserModel.findById(userId);
-//       if (!user) {
-//         return res.status(404).json({ message: "User not found" });
-//       }
-  
-//       // Check if the product is already in favorites
-//       const existingFavorite = await FavoriteModel.findOne({ user: userId, product: productId });
-//       if (existingFavorite) {
-//         return res.status(400).json({ message: "Product already in favorites" });
-//       }
-  
-//       // Create a new favorite entry
-//       const newFavorite = new FavoriteModel({ user: userId, product: productId });
-//       await newFavorite.save();
-  
-//       res.status(201).json(newFavorite);
-//     } catch (error) {
-//       console.error("Error adding favorite:", error);
-//       res.status(500).json({ message: "Internal server error" });
-//     }
-//   });
-  
-//   // Get user's favorites
-//   app.get('/favorites', isAuthenticated, async (req, res) => {
-//     try {
-//       const favorites = await FavoriteModel.find({ user: req.payload._id });
-//       res.status(200).json(favorites);
-//     } catch (err) {
-//       console.error("Database Error:", err.message); 
-//       res.status(500).json(err.message);
-//     }
-//   });
 
 app.listen(process.env.port || 3001); 
 console.log('Running at Port 3001'); 

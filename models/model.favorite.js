@@ -1,5 +1,3 @@
-// Example favorite model using Mongoose
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
